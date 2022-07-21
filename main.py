@@ -118,8 +118,8 @@ async def downloadData(filepath: str) -> None:
         logging.info("Processing " + entry['chat_id'])
         print("Processing " + entry['chat_id'])
         with ZipFile(str(entry['chat_id']) + ".zip", "w") as _zip:
-            with CustomNamedTemporaryFile("wb") as f:
-                for file in entry['items']:
+            for file in entry['items']:
+                with CustomNamedTemporaryFile("wb") as f:
                     try:
                         f.write(await bot.downloadFile(file))
                         _zip.write(f.name)
