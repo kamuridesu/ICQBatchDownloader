@@ -11,6 +11,7 @@ import logging
 import filetype
 import multiprocessing as mp
 import psutil
+import hashlib
 
 bot = ICQBot("")
 
@@ -116,9 +117,15 @@ async def getAllMediaInGalleries(token: str) -> list:
     return data
 
 
-def download(_zip: ZipFile, file_id: str, chat_id: str) -> None:
-    loop = asyncio.get_event_loop()
-    file_bytes = loop.run_until_complete(bot.downloadFile(file_id))
+async def download(_zip: ZipFile, file_id: str, chat_id: str, hash_data: list) -> None:
+    file_bytes = await bot.downloadFile(file_id)
+    file_hash = hashlib.md5(file_bytes).hexdigest()
+    if file_hash in hash_data:
+        print(f"File {file_id} already exists")
+        logging.warning(f"File {file_id} already exists")
+        return
+    hash_data.append(file_hash)
+    print(f"Downloading {file_id}...")
     kind = filetype.guess(file_bytes)
     if kind is None:
         print('Cannot guess file type!')
@@ -133,6 +140,7 @@ def download(_zip: ZipFile, file_id: str, chat_id: str) -> None:
 
 
 async def downloadData(filepath: str) -> None:
+    md5_hashes = []
     MAX_PROCESSES = mp.cpu_count() - 1
     running_tasks: set[asyncio.Task] = set()
     for entry in json.load(open(filepath, 'r')):
@@ -141,12 +149,14 @@ async def downloadData(filepath: str) -> None:
         logging.info("Processing " + entry['chat_id'])
         print("Processing " + entry['chat_id'])
         with ZipFile(str(entry['chat_id']) + ".zip", "w") as _zip:
-            for file in entry['items']:
+            total_files = len(entry['items'])
+            for index, file in enumerate(entry['items']):
+                print(f"{index + 1}/{total_files}")
                 if len(running_tasks) == MAX_PROCESSES or psutil.virtual_memory()[2] > 70:
                     _, pending = await asyncio.wait(running_tasks)
                     while pending:
                         _, pending = await asyncio.wait(running_tasks)
-                task = asyncio.create_task(download(_zip, file, entry['chat_id']))
+                task = asyncio.create_task(download(_zip, file, entry['chat_id'], md5_hashes))
                 running_tasks.add(task)
                 task.add_done_callback(lambda t: running_tasks.remove(t))
     _, pending = await asyncio.wait(running_tasks)
@@ -156,11 +166,11 @@ async def downloadData(filepath: str) -> None:
 
 
 async def main(token: str):
-    chats = await (getAllMediaInGalleries(token))
-    with open("file.json", "w") as f:
-        f.write(json.dumps(chats))
+    # chats = await (getAllMediaInGalleries(token))
+    # with open("file.json", "w") as f:
+    #     f.write(json.dumps(chats))
     await downloadData("file.json")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main(""))
