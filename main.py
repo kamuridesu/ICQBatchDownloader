@@ -8,6 +8,9 @@ import os
 import tempfile
 from zipfile import ZipFile
 import logging
+import filetype
+import multiprocessing as mp
+import psutil
 
 bot = ICQBot("")
 
@@ -113,18 +116,40 @@ async def getAllMediaInGalleries(token: str) -> list:
     return data
 
 
+def download(_zip: ZipFile, file_id: str, chat_id: str) -> None:
+    loop = asyncio.get_event_loop()
+    file_bytes = loop.run_until_complete(bot.downloadFile(file_id))
+    kind = filetype.guess(file_bytes)
+    if kind is None:
+        print('Cannot guess file type!')
+        logging.error(f"{chat_id}: cannot guess file type!")
+        return
+    with CustomNamedTemporaryFile("wb", suffix=f".{kind.extension}") as f:
+            try:
+                f.write(file_bytes)
+                _zip.write(f.name)
+            except Exception:
+                logging.error(f"{chat_id}: {file_id}")
+
+
 async def downloadData(filepath: str) -> None:
+    MAX_PROCESSES = mp.cpu_count - 1
+    processes_queue: list[mp.Process] = []
     for entry in json.load(open(filepath, 'r')):
+        if entry['chat_id'] in os.listdir("."):
+            continue
         logging.info("Processing " + entry['chat_id'])
         print("Processing " + entry['chat_id'])
         with ZipFile(str(entry['chat_id']) + ".zip", "w") as _zip:
-            with CustomNamedTemporaryFile("wb") as f:
-                for file in entry['items']:
-                    try:
-                        f.write(await bot.downloadFile(file))
-                        _zip.write(f.name)
-                    except Exception:
-                        logging.error(f"{entry['chat_id']}: {file}")
+            for file in entry['items']:
+                if len(processes_queue) == MAX_PROCESSES or psutil.virtual_memory()[2] > 70:
+                    [p.join() for p in processes_queue]
+                    processes_queue = []
+                process = mp.Process(target=download, args=(_zip, file, entry['chat_id']))
+                process.start()
+                processes_queue.append(process)
+    [p.join() for p in processes_queue]
+    processes_queue = []  
 
 
 async def main(token: str):

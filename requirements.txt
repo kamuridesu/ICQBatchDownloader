@@ -1,2 +1,3 @@
 aiohttp==3.8.1
 ICQBot==0.2.3b0
+filetype==1.1.0
