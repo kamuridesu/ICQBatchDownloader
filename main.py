@@ -134,7 +134,7 @@ def download(_zip: ZipFile, file_id: str, chat_id: str) -> None:
 
 async def downloadData(filepath: str) -> None:
     MAX_PROCESSES = mp.cpu_count() - 1
-    processes_queue: list[mp.Process] = []
+    running_tasks: set[asyncio.Task] = set()
     for entry in json.load(open(filepath, 'r')):
         if entry['chat_id'] in os.listdir("."):
             continue
@@ -142,14 +142,17 @@ async def downloadData(filepath: str) -> None:
         print("Processing " + entry['chat_id'])
         with ZipFile(str(entry['chat_id']) + ".zip", "w") as _zip:
             for file in entry['items']:
-                if len(processes_queue) == MAX_PROCESSES or psutil.virtual_memory()[2] > 70:
-                    [p.join() for p in processes_queue]
-                    processes_queue = []
-                process = mp.Process(target=download, args=(_zip, file, entry['chat_id']))
-                process.start()
-                processes_queue.append(process)
-    [p.join() for p in processes_queue]
-    processes_queue = []  
+                if len(running_tasks) == MAX_PROCESSES or psutil.virtual_memory()[2] > 70:
+                    _, pending = await asyncio.wait(running_tasks)
+                    while pending:
+                        _, pending = await asyncio.wait(running_tasks)
+                task = asyncio.create_task(download(_zip, file, entry['chat_id']))
+                running_tasks.add(task)
+                task.add_done_callback(lambda t: running_tasks.remove(t))
+    _, pending = await asyncio.wait(running_tasks)
+    while pending:
+        _, pending = await asyncio.wait(running_tasks)
+    [running_tasks.remove(t) for t in running_tasks]
 
 
 async def main(token: str):
