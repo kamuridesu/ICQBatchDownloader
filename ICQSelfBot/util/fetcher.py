@@ -76,7 +76,7 @@ async def fetcher(get_post: str="get", *args, **kwargs):
     :param *args and *kwargs to be used by session
     :return a Response object with the content of the endpoint
     """
-    connector = ProxyConnector.from_url('socks5://127.0.0.1 9050')
+    connector = ProxyConnector.from_url('socks5://127.0.0.1:9050')
     response: typing.Union[Response, None] = None
     async with aiohttp.ClientSession(connector=connector) as session:
         if get_post == "get":
