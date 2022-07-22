@@ -155,7 +155,7 @@ async def downloadData(filepath: str) -> None:
                 print(f"{index + 1}/{total_files}")
                 if len(running_tasks) == MAX_PROCESSES or psutil.virtual_memory()[2] > 70:
                     _, pending = await asyncio.wait(running_tasks)
-                    while pending and psutil.virtual_memory()[2] > 60 and len(running_tasks) > MAX_PROCESSES / 2:
+                    while pending or (psutil.virtual_memory()[2] > 60 and len(running_tasks) > MAX_PROCESSES / 2):
                         _, pending = await asyncio.wait(running_tasks)
                 task = asyncio.create_task(download(_zip, file, entry['chat_id'], md5_hashes))
                 running_tasks.add(task)
