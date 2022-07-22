@@ -133,7 +133,7 @@ def download(_zip: ZipFile, file_id: str, chat_id: str) -> None:
 
 
 async def downloadData(filepath: str) -> None:
-    MAX_PROCESSES = mp.cpu_count - 1
+    MAX_PROCESSES = mp.cpu_count() - 1
     processes_queue: list[mp.Process] = []
     for entry in json.load(open(filepath, 'r')):
         if entry['chat_id'] in os.listdir("."):
