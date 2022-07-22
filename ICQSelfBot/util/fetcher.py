@@ -2,6 +2,7 @@ import json
 import aiohttp
 from copy import deepcopy
 import typing
+from aiohttp_socks import ProxyType, ProxyConnector, ChainProxyConnector
 
 
 class CustomDict(dict):
@@ -75,8 +76,9 @@ async def fetcher(get_post: str="get", *args, **kwargs):
     :param *args and *kwargs to be used by session
     :return a Response object with the content of the endpoint
     """
+    connector = ProxyConnector.from_url('socks5://127.0.0.1 9050')
     response: typing.Union[Response, None] = None
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(connector=connector) as session:
         if get_post == "get":
             async with session.get(*args, **kwargs) as _response:
                 response = Response(_response.status, await _response.read())

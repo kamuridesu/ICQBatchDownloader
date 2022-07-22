@@ -2,3 +2,4 @@ aiohttp==3.8.1
 ICQBot==0.2.3b0
 filetype==1.1.0
 psutil==5.9.1
+aiohttp-socks==0.7.1

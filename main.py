@@ -118,6 +118,7 @@ async def getAllMediaInGalleries(token: str) -> list:
 
 
 async def download(_zip: ZipFile, file_id: str, chat_id: str, hash_data: list) -> None:
+    print(f"Downloading {file_id}...")
     file_bytes = await bot.downloadFile(file_id)
     file_hash = hashlib.md5(file_bytes).hexdigest()
     if file_hash in hash_data:
@@ -125,7 +126,6 @@ async def download(_zip: ZipFile, file_id: str, chat_id: str, hash_data: list) -
         logging.warning(f"File {file_id} already exists")
         return
     hash_data.append(file_hash)
-    print(f"Downloading {file_id}...")
     kind = filetype.guess(file_bytes)
     if kind is None:
         print('Cannot guess file type!')
@@ -141,7 +141,8 @@ async def download(_zip: ZipFile, file_id: str, chat_id: str, hash_data: list) -
 
 async def downloadData(filepath: str) -> None:
     md5_hashes = []
-    MAX_PROCESSES = mp.cpu_count() - 1
+    # MAX_PROCESSES = mp.cpu_count() - 1
+    MAX_PROCESSES = 30
     running_tasks: set[asyncio.Task] = set()
     for entry in json.load(open(filepath, 'r')):
         if entry['chat_id'] in os.listdir("."):
@@ -154,7 +155,7 @@ async def downloadData(filepath: str) -> None:
                 print(f"{index + 1}/{total_files}")
                 if len(running_tasks) == MAX_PROCESSES or psutil.virtual_memory()[2] > 70:
                     _, pending = await asyncio.wait(running_tasks)
-                    while pending:
+                    while pending and psutil.virtual_memory()[2] > 60 and len(running_tasks) > MAX_PROCESSES / 2:
                         _, pending = await asyncio.wait(running_tasks)
                 task = asyncio.create_task(download(_zip, file, entry['chat_id'], md5_hashes))
                 running_tasks.add(task)
