@@ -66,6 +66,18 @@ async def getMediaIdList(media: list) -> list:
     return ids
 
 
+async def saveHash(md5: str) -> None:
+    with open("hash.txt", "a") as f:
+        f.write(md5 + "\n")
+
+
+async def loadHash() -> list:
+    if os.path.exists("hash.txt"):
+        with open("hash.txt", "r") as f:
+            return f.read().split("\n")
+    return []
+
+
 async def getGallery(token: str, chat_id: str) -> dict:
     body = {"reqId":"1","aimsid":token,"params":{"sn":chat_id,"entriesInPatch":True,"subreqs":[{"subreqId":"older","fromEntryId":"max","entryCount":-10000,"urlType":["video","image"]}]}}
     response: Response = await fetcher('post', "https://u.icq.net/api/v83/rapi/getEntryGallery", json=(body), headers=HEADERS)
@@ -126,6 +138,7 @@ async def download(_zip: ZipFile, file_id: str, chat_id: str, hash_data: list) -
         logging.warning(f"File {file_id} already exists")
         return
     hash_data.append(file_hash)
+    await saveHash(file_hash)
     kind = filetype.guess(file_bytes)
     if kind is None:
         print('Cannot guess file type!')
@@ -140,7 +153,7 @@ async def download(_zip: ZipFile, file_id: str, chat_id: str, hash_data: list) -
 
 
 async def downloadData(filepath: str) -> None:
-    md5_hashes = []
+    md5_hashes = await loadHash()
     # MAX_PROCESSES = mp.cpu_count() - 1
     MAX_PROCESSES = 30
     running_tasks: set[asyncio.Task] = set()
@@ -167,9 +180,9 @@ async def downloadData(filepath: str) -> None:
 
 
 async def main(token: str):
-    # chats = await (getAllMediaInGalleries(token))
-    # with open("file.json", "w") as f:
-    #     f.write(json.dumps(chats))
+    chats = await (getAllMediaInGalleries(token))
+    with open("file.json", "w") as f:
+        f.write(json.dumps(chats))
     await downloadData("file.json")
 
 
