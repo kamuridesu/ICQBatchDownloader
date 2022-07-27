@@ -113,7 +113,7 @@ async def getGallery(token: str, chat_id: str) -> dict:
                 return result
         except Exception:
             logging.error(traceback.format_exc())
-            print(result)
+            print(response_json)
             raise
 
     return result
