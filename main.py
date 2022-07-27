@@ -13,7 +13,7 @@ import multiprocessing as mp
 import psutil
 import hashlib
 
-bot = ICQBot("")
+bot = ICQBot(os.getenv("BOT_TOKEN"))
 
 logging.basicConfig(filename="downloader.log", level=logging.INFO, datefmt="%Y-%m-%d,%H:%M:%S")
 
@@ -187,4 +187,4 @@ async def main(token: str):
 
 
 if __name__ == "__main__":
-    asyncio.run(main(""))
+    asyncio.run(main(os.getenv("USER_TOKEN")))
