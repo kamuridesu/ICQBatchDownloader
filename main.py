@@ -12,6 +12,7 @@ import filetype
 import multiprocessing as mp
 import psutil
 import hashlib
+import traceback
 
 bot = ICQBot(os.getenv("BOT_TOKEN"))
 
@@ -92,23 +93,29 @@ async def getGallery(token: str, chat_id: str) -> dict:
         if response_json['status']['code'] == 40000:
             print(response_json['status']['reason'])
             return result
-        response_gallery = response_json['results']['galleryState']['itemsCount']
-        if response_gallery:
-            if "image" not in response_gallery.keys() or "video" not in response_gallery.keys():
+        try:
+            response_gallery = response_json['results']['galleryState']['itemsCount']
+            if response_gallery:
+                if "image" not in response_gallery.keys() or "video" not in response_gallery.keys():
+                    return result
+                total_images = response_gallery['image']
+                total_videos = 0
+                try:
+                    total_videos = response_gallery['video']
+                except Exception:
+                    pass
+                result = {
+                    "total": total_images + total_videos,
+                    "total_images": total_images,
+                    "total_videos": total_videos,
+                    "entries": response_json['results']['subreqs'][0]['entries']
+                }
                 return result
-            total_images = response_gallery['image']
-            total_videos = 0
-            try:
-                total_videos = response_gallery['video']
-            except Exception:
-                pass
-            result = {
-                "total": total_images + total_videos,
-                "total_images": total_images,
-                "total_videos": total_videos,
-                "entries": response_json['results']['subreqs'][0]['entries']
-            }
-            return result
+        except Exception:
+            logging.error(traceback.format_exc())
+            print(result)
+            raise
+
     return result
 
 
