@@ -15,7 +15,7 @@ class CustomDict(dict):
     def __repr__(self):
         if hasattr(self, "bot_instance"):
             x = deepcopy(self)
-            del x['bot_instance']
+            del x["bot_instance"]
             return repr(x.__dict__)
         else:
             return repr(self.__dict__)
@@ -69,7 +69,7 @@ class Response(CustomDict):
         return json.loads(self.content.decode("utf-8"))
 
 
-async def fetcher(get_post: str="get", *args, **kwargs):
+async def fetcher(get_post: str = "get", *args, **kwargs):
     """
     function to fetch data from endpoints
     :param get_post: REST option (defaults to get)
