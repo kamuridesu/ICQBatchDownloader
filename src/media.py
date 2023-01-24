@@ -1,5 +1,8 @@
+import traceback
+import logging
+
 from .chats import getChats
-from .ICQSelfBot.util import fetcher
+from .ICQSelfBot.util import fetcher, Response
 from .ICQSelfBot.mapper.common import HEADERS
 
 
@@ -65,7 +68,6 @@ async def getGallery(token: str, chat_id: str) -> dict:
                 return result
         except Exception:
             logging.error(traceback.format_exc())
-            print(response_json)
             raise
 
     return result

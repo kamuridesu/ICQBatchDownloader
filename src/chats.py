@@ -1,5 +1,6 @@
 from .ICQSelfBot.mapper import polling
 
+
 async def getChats(token: str) -> list:
     results = await polling.start_polling(token)
     chats = []

@@ -8,3 +8,4 @@ async def start_polling(token: str, timeout: int = 30000) -> dict:
     response: Response = await fetcher("get", url + query, headers=HEADERS)
     if response.status == 200:
         return await response.json()
+    return {}
