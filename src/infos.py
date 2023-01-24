@@ -3,15 +3,17 @@ import json
 
 
 async def saveInfos(file_info: dict) -> None:
+    path = os.path.join("./data/", "file_infos.json")
     old_file_info = await loadInfos()
-    with open("file_infos.json", "w") as f:
+    with open(path, "w") as f:
         old_file_info.append(file_info)
         f.write(json.dumps(old_file_info))
 
 
 async def loadInfos() -> list:
-    if os.path.exists("file_infos.json"):
-        with open("file_infos.json", "r") as f:
+    path = os.path.join("./data/", "file_infos.json")
+    if os.path.exists(path):
+        with open(path, "r") as f:
             return json.loads(f.read())
     return []
 

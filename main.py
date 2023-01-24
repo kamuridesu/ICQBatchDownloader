@@ -13,8 +13,11 @@ from src.downloader import processItems
 
 bot_token = os.getenv("BOT_TOKEN")
 bot = ICQBot(bot_token)
-os.makedirs("./logs") if not os.path.exists("./logs") else None
-os.makedirs("./downloaded") if not os.path.exists("./downloaded") else None
+required_folders = ["./logs", "./downloaded", "./data"]
+for req in required_folders:
+    if not os.path.exists(req):
+        os.makedirs(req)
+
 
 logging.basicConfig(
     filename="./logs/downloader.log", level=logging.INFO, datefmt="%Y-%m-%d,%H:%M:%S"
@@ -41,7 +44,7 @@ async def downloadData(filepath: str) -> None:
 
 async def main(token: str):
     chats = await (getAllMediaInGalleries(token))
-    chats_filename = "files.json"
+    chats_filename = os.path.join("./data", "files.json")
     await saveChats(chats_filename, chats)
     await downloadData(chats_filename)
 
