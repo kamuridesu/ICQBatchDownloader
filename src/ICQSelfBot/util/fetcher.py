@@ -1,6 +1,9 @@
 import json
-import aiohttp
+import os
+import socket
 from copy import deepcopy
+
+import aiohttp
 import typing
 from aiohttp_socks import ProxyType, ProxyConnector, ChainProxyConnector
 
@@ -76,10 +79,11 @@ async def fetcher(get_post: str = "get", *args, **kwargs):
     :param *args and *kwargs to be used by session
     :return a Response object with the content of the endpoint
     """
-    # connector = ProxyConnector.from_url('socks5://127.0.0.1:9050')
     response: typing.Union[Response, None] = None
-    # async with aiohttp.ClientSession(connector=connector) as session:
-    async with aiohttp.ClientSession() as session:
+    connector = None
+    if os.getenv('TOR') == "enabled":
+        connector = ProxyConnector.from_url('socks5://127.0.0.1:9050')
+    async with aiohttp.ClientSession(connector=connector) as session:
         if get_post == "get":
             async with session.get(*args, **kwargs) as _response:
                 response = Response(_response.status, await _response.read())
@@ -87,3 +91,7 @@ async def fetcher(get_post: str = "get", *args, **kwargs):
             async with session.post(*args, **kwargs) as _response:
                 response = Response(_response.status, await _response.read())
     return response
+
+
+async def newTorIP():
+    os.system("sudo systemctl restart tor")

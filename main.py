@@ -20,7 +20,6 @@ logging.basicConfig(
 )
 
 
-
 async def downloadData(filepath: str) -> None:
     # MAX_PROCESSES = mp.cpu_count() - 1
     MAX_PROCESSES = 30
@@ -31,7 +30,7 @@ async def downloadData(filepath: str) -> None:
         print("Processing " + entry["chat_id"])
         folder_name = entry["chat_id"]
         total_files = len(entry["items"])
-        t = await processItems(bot, entry, total_files, running_tasks, MAX_PROCESSES, folder_name, file_infos)
+        t = await processItems(bot, entry, total_files, running_tasks, MAX_PROCESSES, folder_name,)
     if running_tasks:
         _, pending = await asyncio.wait(running_tasks)
         while pending:
