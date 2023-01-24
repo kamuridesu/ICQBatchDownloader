@@ -49,7 +49,6 @@ async def download(
 async def processItems(bot: ICQBot, entry: dict, total_files: int, running_tasks: set[asyncio.Task], MAX_PROCESSES: int, folder_name: str):
     file_infos = await loadInfos()
     for index, file in enumerate(entry["items"]):
-        print(f"{index + 1}/{total_files}")
         if (
             len(running_tasks) == MAX_PROCESSES
             or psutil.virtual_memory()[2] > 70

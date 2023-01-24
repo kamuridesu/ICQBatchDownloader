@@ -50,7 +50,7 @@ async def getGallery(token: str, chat_id: str) -> dict:
             if response_gallery:
                 if (
                     "image" not in response_gallery.keys()
-                    or "video" not in response_gallery.keys()
+                    and "video" not in response_gallery.keys()
                 ):
                     return result
                 total_images = response_gallery["image"]
@@ -78,7 +78,7 @@ async def getAllMediaInGalleries(token: str) -> list:
     data = []
     for group in chats:
         for chat in group:
-            print(chat["aimId"])
+            print(f"Got chat with id: {chat['aimId']}")
             media = await getGallery(token, chat["aimId"])
             items = await getMediaIdList(media["entries"])
             if items:
