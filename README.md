@@ -30,7 +30,7 @@ python3 main.py
 #### Building
 
 ```
-docker build --name ICQDownloader .
+docker build -t icqdownloader .
 ```
 
 #### Running
@@ -38,7 +38,7 @@ docker build --name ICQDownloader .
 Just run the following command:
 
 ```
-docker run --rm -it -e USER_TOKEN=$USER_TOKEN -e BOT_TOKEN=$BOT_TOKEN -v $(pwd)/logs:/app/logs -v $(pwd)/downloaded:/app/downloaded -v $(pwd)/data:/app/data ICQDownloader
+docker run --rm -it -e USER_TOKEN=$USER_TOKEN -e BOT_TOKEN=$BOT_TOKEN -v $(pwd)/logs:/app/logs -v $(pwd)/downloaded:/app/downloaded -v $(pwd)/data:/app/data icqdownloader
 ```
 
 You can set the folders to be anywhere on your system.
