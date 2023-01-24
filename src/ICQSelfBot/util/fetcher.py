@@ -1,6 +1,9 @@
 import json
-import aiohttp
+import os
+import socket
 from copy import deepcopy
+
+import aiohttp
 import typing
 from aiohttp_socks import ProxyType, ProxyConnector, ChainProxyConnector
 
@@ -15,7 +18,7 @@ class CustomDict(dict):
     def __repr__(self):
         if hasattr(self, "bot_instance"):
             x = deepcopy(self)
-            del x['bot_instance']
+            del x["bot_instance"]
             return repr(x.__dict__)
         else:
             return repr(self.__dict__)
@@ -69,15 +72,17 @@ class Response(CustomDict):
         return json.loads(self.content.decode("utf-8"))
 
 
-async def fetcher(get_post: str="get", *args, **kwargs):
+async def fetcher(get_post: str = "get", *args, **kwargs):
     """
     function to fetch data from endpoints
     :param get_post: REST option (defaults to get)
     :param *args and *kwargs to be used by session
     :return a Response object with the content of the endpoint
     """
-    connector = ProxyConnector.from_url('socks5://127.0.0.1:9050')
     response: typing.Union[Response, None] = None
+    connector = None
+    if os.getenv('TOR') == "enabled":
+        connector = ProxyConnector.from_url('socks5://127.0.0.1:9050')
     async with aiohttp.ClientSession(connector=connector) as session:
         if get_post == "get":
             async with session.get(*args, **kwargs) as _response:
@@ -86,3 +91,7 @@ async def fetcher(get_post: str="get", *args, **kwargs):
             async with session.post(*args, **kwargs) as _response:
                 response = Response(_response.status, await _response.read())
     return response
+
+
+async def newTorIP():
+    os.system("sudo systemctl restart tor")
