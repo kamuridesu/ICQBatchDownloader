@@ -1,8 +1,5 @@
-import json
 import os
 import logging
-import psutil
-from zipfile import ZipFile
 
 import asyncio
 from ICQBot import ICQBot
