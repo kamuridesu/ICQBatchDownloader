@@ -28,4 +28,3 @@ async def readChats(chats_filename: str) -> list:
 async def saveChats(chats_filename: str, chats: list) -> None:
     with open(chats_filename, "w") as f:
         f.write(json.dumps(chats))
-

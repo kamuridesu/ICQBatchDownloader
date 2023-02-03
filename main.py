@@ -34,13 +34,16 @@ async def downloadData(filepath: str) -> None:
         print("Processing " + entry["chat_id"])
         folder_name = os.path.join("./downloaded", entry["chat_id"])
         total_files = len(entry["items"])
-        t = await processItems(bot, entry, total_files, running_tasks, MAX_PROCESSES, folder_name)
+        t = await processItems(
+            bot, entry, total_files, running_tasks, MAX_PROCESSES, folder_name
+        )
     if running_tasks:
         _, pending = await asyncio.wait(running_tasks)
         while pending:
             _, pending = await asyncio.wait(running_tasks)
         for t in running_tasks:
             running_tasks.remove(t)
+
 
 async def main(token: str):
     chats = await (getAllMediaInGalleries(token))
