@@ -46,13 +46,17 @@ async def download(
             logging.error(f"{chat_id}: {file_id}")
 
 
-async def processItems(bot: ICQBot, entry: dict, total_files: int, running_tasks: set[asyncio.Task], MAX_PROCESSES: int, folder_name: str):
+async def processItems(
+    bot: ICQBot,
+    entry: dict,
+    total_files: int,
+    running_tasks: set[asyncio.Task],
+    MAX_PROCESSES: int,
+    folder_name: str,
+):
     file_infos = await loadInfos()
     for index, file in enumerate(entry["items"]):
-        if (
-            len(running_tasks) == MAX_PROCESSES
-            or psutil.virtual_memory()[2] > 70
-        ):
+        if len(running_tasks) == MAX_PROCESSES or psutil.virtual_memory()[2] > 70:
             if running_tasks:
                 _, pending = await asyncio.wait(running_tasks)
                 while pending or (

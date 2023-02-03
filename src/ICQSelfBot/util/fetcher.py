@@ -81,8 +81,8 @@ async def fetcher(get_post: str = "get", *args, **kwargs):
     """
     response: typing.Union[Response, None] = None
     connector = None
-    if os.getenv('TOR') == "enabled":
-        connector = ProxyConnector.from_url('socks5://127.0.0.1:9050')
+    if os.getenv("TOR") == "enabled":
+        connector = ProxyConnector.from_url("socks5://127.0.0.1:9050")
     async with aiohttp.ClientSession(connector=connector) as session:
         if get_post == "get":
             async with session.get(*args, **kwargs) as _response:
