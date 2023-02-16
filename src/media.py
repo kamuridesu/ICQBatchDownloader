@@ -73,8 +73,8 @@ async def getGallery(token: str, chat_id: str) -> dict:
     return result
 
 
-async def getAllMediaInGalleries(token: str) -> list:
-    chats = await getChats(token)
+async def getAllMediaInGalleries(token: str, user_seq: str) -> list:
+    chats = await getChats(token, user_seq)
     data = []
     for group in chats:
         for chat in group:

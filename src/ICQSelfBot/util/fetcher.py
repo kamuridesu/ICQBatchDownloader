@@ -1,11 +1,10 @@
 import json
 import os
-import socket
 from copy import deepcopy
 
 import aiohttp
 import typing
-from aiohttp_socks import ProxyType, ProxyConnector, ChainProxyConnector
+from aiohttp_socks import ProxyConnector
 
 
 class CustomDict(dict):
@@ -81,6 +80,8 @@ async def fetcher(get_post: str = "get", *args, **kwargs):
     """
     response: typing.Union[Response, None] = None
     connector = None
+    if os.getenv("DEBUG"):
+        print(args, kwargs)
     if os.getenv("TOR") == "enabled":
         connector = ProxyConnector.from_url("socks5://127.0.0.1:9050")
     async with aiohttp.ClientSession(connector=connector) as session:

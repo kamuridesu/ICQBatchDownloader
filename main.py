@@ -1,14 +1,11 @@
-import json
 import os
 import logging
-import psutil
-from zipfile import ZipFile
 
 import asyncio
 from ICQBot import ICQBot
 
 from src.media import getAllMediaInGalleries
-from src.infos import loadInfos, saveInfos, readChats, saveChats
+from src.infos import readChats, saveChats
 from src.downloader import processItems
 
 bot_token = os.getenv("BOT_TOKEN")
@@ -45,8 +42,8 @@ async def downloadData(filepath: str) -> None:
             running_tasks.remove(t)
 
 
-async def main(token: str):
-    chats = await (getAllMediaInGalleries(token))
+async def main(token: str, user_seq: str):
+    chats = await (getAllMediaInGalleries(token, user_seq))
     chats_filename = os.path.join("./data", "files.json")
     await saveChats(chats_filename, chats)
     await downloadData(chats_filename)
@@ -54,9 +51,10 @@ async def main(token: str):
 
 if __name__ == "__main__":
     user_token = os.getenv("USER_TOKEN")
-    if user_token:
+    user_seq = os.getenv("USER_SEQ")
+    if user_token and user_seq:
         print("Starting")
-        asyncio.run(main(user_token))
+        asyncio.run(main(user_token, user_seq))
     else:
-        print("Invalid user token!")
+        print("Invalid user token or seqNum!")
         exit(1)
